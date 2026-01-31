@@ -1,8 +1,9 @@
 import express from "express";
 import Stripe from "stripe";
 import bodyParser from "body-parser";
-
+import cors from "cors";
 const app = express();
+app.use(cors()); // 👈 this line enables CORS for every request
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 // Stripe needs the raw body to validate signatures
@@ -46,3 +47,4 @@ app.get("/isPremium", (req, res) => {
 
 
 app.listen(3000, () => console.log("Webhook running on port 3000"));
+
