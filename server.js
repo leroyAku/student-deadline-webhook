@@ -1,0 +1,38 @@
+import express from "express";
+import Stripe from "stripe";
+import bodyParser from "body-parser";
+
+const app = express();
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+
+// Stripe needs the raw body to validate signatures
+app.use(bodyParser.raw({ type: "application/json" }));
+
+app.post("/stripe-webhook", async (req, res) => {
+  const sig = req.headers["stripe-signature"];
+  let event;
+
+  try {
+    // Validate that the webhook really came from Stripe
+    event = stripe.webhooks.constructEvent(
+      req.body,
+      sig,
+      process.env.STRIPE_WEBHOOK_SECRET
+    );
+  } catch (err) {
+    console.error("⚠️  Signature verification failed:", err.message);
+    return res.sendStatus(400);
+  }
+
+  // Called every time a checkout is completed successfully
+  if (event.type === "checkout.session.completed") {
+    const session = event.data.object;
+    const email = session.customer_details.email;
+    console.log("✅ Payment confirmed for:", email);
+    // Later we’ll store or flag the email as premium
+  }
+
+  res.sendStatus(200);
+});
+
+app.listen(3000, () => console.log("Webhook running on port 3000"));
