@@ -35,4 +35,14 @@ app.post("/stripe-webhook", async (req, res) => {
   res.sendStatus(200);
 });
 
+// Simple test route so the extension or you can check Premium status
+app.get("/isPremium", (req, res) => {
+  const email = req.query.email;
+  // temporary example until a database or sheet is connected
+  const premiumEmails = ["test@example.com"]; // later replace with real buyer emails
+  const isPro = premiumEmails.includes(email);
+  res.json({ email, premium: isPro });
+});
+
+
 app.listen(3000, () => console.log("Webhook running on port 3000"));
